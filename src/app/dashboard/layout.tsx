@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { LogOut } from 'lucide-react'
+import { LogOut, Building2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { getSidebarItemsForRole, UserRole, SidebarItem } from '@/lib/auth-types'
@@ -66,22 +66,26 @@ export default function DashboardLayout({
 
     if (loading) {
         return (
-            <div className="flex h-screen items-center justify-center bg-slate-50">
+            <div className="flex h-screen items-center justify-center bg-background">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
         )
     }
 
     return (
-        <div className="flex h-screen bg-slate-50">
-            <aside className="w-64 bg-white border-r hidden md:flex flex-col">
-                <div className="p-6 border-b">
-                    <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                        Smart Town
-                    </h1>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider mt-1">
-                        {role} Portal
-                    </p>
+        <div className="flex h-screen bg-background text-foreground">
+            {/* Sidebar */}
+            <aside className="w-64 border-r bg-muted/10 hidden md:flex flex-col">
+                <div className="p-6 border-b flex items-center gap-2">
+                    <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
+                        <Building2 className="h-5 w-5" />
+                    </div>
+                    <div>
+                        <h1 className="text-lg font-bold tracking-tight">Smart Town</h1>
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">
+                            {role} Portal
+                        </p>
+                    </div>
                 </div>
 
                 <nav className="flex-1 p-4 space-y-1">
@@ -94,10 +98,10 @@ export default function DashboardLayout({
                                 key={item.href}
                                 href={item.href}
                                 className={cn(
-                                    "flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors",
+                                    "flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-all duration-200",
                                     isActive
-                                        ? "bg-primary text-primary-foreground"
-                                        : "text-muted-foreground hover:bg-slate-100 hover:text-foreground"
+                                        ? "bg-primary text-primary-foreground shadow-sm"
+                                        : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                                 )}
                             >
                                 <Icon className="h-4 w-4" />
@@ -107,22 +111,33 @@ export default function DashboardLayout({
                     })}
                 </nav>
 
-                <div className="p-4 border-t">
+                <div className="p-4 border-t bg-muted/5">
                     <button
                         onClick={handleSignOut}
-                        className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-red-600 rounded-md hover:bg-red-50 w-full transition-colors"
+                        className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 rounded-md w-full transition-colors"
                     >
                         <LogOut className="h-4 w-4" />
                         Sign Out
                     </button>
+                    <div className="mt-4 px-3 flex items-center gap-3">
+                        <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                        <span className="text-xs text-muted-foreground">System Online</span>
+                    </div>
                 </div>
             </aside>
 
-            <main className="flex-1 overflow-y-auto">
-                <header className="h-16 border-b bg-white flex items-center px-8 justify-between md:hidden">
-                    <span className="font-bold">Smart Town</span>
+            {/* Main Content */}
+            <main className="flex-1 overflow-y-auto bg-background">
+                {/* Mobile Header */}
+                <header className="h-16 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex items-center px-6 justify-between md:hidden sticky top-0 z-50">
+                    <span className="font-bold flex items-center gap-2">
+                        <div className="h-6 w-6 rounded bg-primary flex items-center justify-center text-primary-foreground">
+                            <Building2 className="h-4 w-4" />
+                        </div>
+                        Smart Town
+                    </span>
                 </header>
-                <div className="p-8">
+                <div className="p-8 max-w-7xl mx-auto">
                     {children}
                 </div>
             </main>

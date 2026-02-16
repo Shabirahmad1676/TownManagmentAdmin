@@ -5,11 +5,9 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
-import { AlertCircle } from 'lucide-react'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-
+import { AlertCircle, Loader2, Lock, Mail, Building2 } from 'lucide-react'
+import Link from 'next/link'
 
 export default function LoginPage() {
     const [email, setEmail] = useState('')
@@ -36,25 +34,20 @@ export default function LoginPage() {
             }
 
             // Check role
-            // Check role
             const { data: { user } } = await supabase.auth.getUser()
             if (user) {
-                console.log("User found:", user.email)
                 const { data: profile, error: profileError } = await supabase.from('profiles').select('role').eq('id', user.id).single()
 
                 if (profileError) {
-                    console.error("Profile fetch error:", profileError)
-                    setError("Error fetching user profile: " + profileError.message + " (Check RLS Policies)")
+                    setError("Error fetching user profile: " + profileError.message)
                     return
                 }
 
                 if (!profile) {
-                    console.error("No profile found for user")
-                    setError("User exists but has no Profile row. (Trigger failed?)")
+                    setError("User exists but has no Profile row.")
                     return
                 }
 
-                console.log("Role found:", profile.role)
                 if (profile.role === 'client') {
                     await supabase.auth.signOut()
                     setError("Access Denied: Your role is 'client'. Please use the mobile app.")
@@ -72,68 +65,96 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-slate-50">
-            <Card className="w-full max-w-md">
-                <CardHeader className="space-y-1">
-                    <CardTitle className="text-2xl font-bold text-center">Admin Login</CardTitle>
-                    <CardDescription className="text-center">
-                        Enter your credentials to access the dashboard
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <form onSubmit={handleLogin} className="space-y-4">
-                        <div className="space-y-2">
+        <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2">
+            <div className="flex items-center justify-center py-12">
+                <div className="mx-auto grid w-[350px] gap-6">
+                    <div className="grid gap-2 text-center">
+                        <h1 className="text-3xl font-bold">Admin Login</h1>
+                        <p className="text-balance text-muted-foreground">
+                            Enter your email below to login to your account
+                        </p>
+                    </div>
+                    <form onSubmit={handleLogin} className="grid gap-4">
+                        <div className="grid gap-2">
                             <Label htmlFor="email">Email</Label>
-                            <Input
-                                id="email"
-                                type="email"
-                                placeholder="admin@example.com"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                            />
+                            <div className="relative">
+                                <div className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground">
+                                    <Mail className="h-4 w-4" />
+                                </div>
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    placeholder="m@example.com"
+                                    required
+                                    className="pl-9"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                />
+                            </div>
                         </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="password">Password</Label>
-                            <Input
-                                id="password"
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                            />
+                        <div className="grid gap-2">
+                            <div className="flex items-center">
+                                <Label htmlFor="password">Password</Label>
+                            </div>
+                            <div className="relative">
+                                <div className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground">
+                                    <Lock className="h-4 w-4" />
+                                </div>
+                                <Input
+                                    id="password"
+                                    type="password"
+                                    required
+                                    className="pl-9"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                />
+                            </div>
                         </div>
-
-                        <div className="space-y-2">
-                            <Label>Login As (Verifying...)</Label>
-                            <Select defaultValue="auto">
-                                <SelectTrigger disabled>
-                                    <SelectValue placeholder="Detecting Role..." />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="auto">Auto-Detect Role</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <p className="text-[10px] text-muted-foreground">System automatically detects your role based on email.</p>
-                        </div>
-
                         {error && (
-                            <div className="flex items-center gap-2 p-3 text-sm text-red-600 bg-red-50 rounded-md">
+                            <div className="flex items-center gap-2 p-3 text-sm text-destructive bg-destructive/10 rounded-md">
                                 <AlertCircle className="h-4 w-4" />
                                 {error}
                             </div>
                         )}
-
                         <Button type="submit" className="w-full" disabled={loading}>
-                            {loading ? 'Signing in...' : 'Sign In'}
+                            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Login'}
                         </Button>
-
-                        <div className="text-center text-sm">
-                            Don't have an account? <a href="/signup" className="text-primary hover:underline">Sign Up</a>
-                        </div>
                     </form>
-                </CardContent>
-            </Card>
+                    <div className="mt-4 text-center text-sm">
+                        Don&apos;t have an account?{" "}
+                        <Link href="/signup" className="underline hover:text-primary">
+                            Sign up
+                        </Link>
+                    </div>
+                </div>
+            </div>
+            {/* Left side: Branding */}
+            <div className="relative hidden w-full h-full flex-col bg-muted p-10 text-white dark:border-r lg:flex">
+                <div className="absolute inset-0 bg-zinc-900" />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                    src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2670&auto=format&fit=crop"
+                    alt="Modern Architecture"
+                    className="absolute inset-0 h-full w-full object-cover brightness-[0.4]"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/20 to-transparent" />
+
+                <div className="relative z-20 flex items-center text-lg font-medium tracking-tight">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground mr-2">
+                        <Building2 className="h-5 w-5" />
+                    </div>
+                    Smart Town Admin
+                </div>
+
+                <div className="relative z-20 mt-auto">
+                    <blockquote className="space-y-2">
+                        <p className="text-lg font-medium leading-relaxed">
+                            &ldquo;This dashboard gives us complete control over plot inventory, sales tracking, and customer management. It&apos;s the brain of our operation.&rdquo;
+                        </p>
+                        <footer className="text-sm text-zinc-300">System Administrator</footer>
+                    </blockquote>
+                </div>
+            </div>
         </div>
     )
 }

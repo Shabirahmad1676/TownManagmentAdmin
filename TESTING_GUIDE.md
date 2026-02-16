@@ -58,6 +58,37 @@ Ensure you have created these 3 users in **Supabase Auth** and run the `setup_te
 
 ---
 
+---
+
+## Test Scenario 4: The Full Cycle (Mobile + Admin)
+**Goal:** Verify the complete business flow.
+
+1.  **Mobile App (Client)**:
+    *   Login as a Client (or Sign up).
+    *   Tap **"Browse"** -> Select a Plot -> Tap **"Buy Now"**.
+    *   Choose **"Installments (12 months)"** -> Confirm.
+    *   **Result**: You see a success message "Request sent".
+
+2.  **Web Dashboard (Superadmin)**:
+    *   Login as `superadmin@stms.com`.
+    *   Go to **Plot Requests**.
+    *   You should see the new request from the client.
+    *   Click ✅ **Approve**.
+
+3.  **Web Dashboard (Accountant)**:
+    *   Login as `accountant@stms.com`.
+    *   Go to **Installments**.
+    *   You will see 12 generated installment rows for that plot.
+    *   Click **"Mark Paid"** on the first one.
+
+4.  **Mobile App (Client)**:
+    *   Go to **"My Dashboard"**.
+    *   You should now see the Plot listed under "My Plots".
+    *   The "Paid Amount" progress bar should have moved up.
+    *   The first installment should show as "Paid".
+
+---
+
 ## Troubleshooting
 *   **Login Failed?** Run `e:/Town/supabase/setup_test_users.sql` again to reset roles.
 *   **"Row Level Security" Error?** Run `e:/Town/supabase/fix_rls.sql` to ensure users can read their own profiles.
