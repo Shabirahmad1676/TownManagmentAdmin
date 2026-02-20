@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import Link from 'next/link'
+import SellPlotDialog from './sell-plot-dialog'
+import TransferPlotDialog from './transfer-plot-dialog'
 
 export default async function PlotsPage() {
     const supabase = await createClient()
@@ -22,6 +24,11 @@ export default async function PlotsPage() {
             profiles (name)
         `)
         .order('plot_number', { ascending: true })
+
+    const { data: templates } = await supabase
+        .from('installment_templates')
+        .select('*')
+        .order('total_months', { ascending: true })
 
     if (error) {
         return <div className="p-4 text-red-500">Error loading plots: {error.message}</div>
@@ -54,7 +61,7 @@ export default async function PlotsPage() {
                                 <TableHead>Size (Marla)</TableHead>
                                 <TableHead>Price (PKR)</TableHead>
                                 <TableHead>Status</TableHead>
-                                <TableHead>Owner</TableHead>
+                                <TableHead>Owner / Action</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -77,7 +84,16 @@ export default async function PlotsPage() {
                                                 {plot.status}
                                             </span>
                                         </TableCell>
-                                        <TableCell>{plot.profiles?.name || '-'}</TableCell>
+                                        <TableCell>
+                                            {plot.status === 'Available' ? (
+                                                <SellPlotDialog plot={plot} templates={templates || []} />
+                                            ) : (
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-sm font-medium">{plot.profiles?.name || 'Unknown'}</span>
+                                                    <TransferPlotDialog plot={plot} />
+                                                </div>
+                                            )}
+                                        </TableCell>
                                     </TableRow>
                                 ))
                             )}
