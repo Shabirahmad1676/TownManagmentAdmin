@@ -9,7 +9,7 @@ export default async function InstallmentsPage() {
     const supabase = await createClient()
 
     const { data: installments, error } = await supabase
-        .from('installments')
+        .from('plot_installments')
         .select(`
             id,
             due_date,
@@ -44,31 +44,44 @@ export default async function InstallmentsPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {installments?.map((inst: any) => {
-                                const isOverdue = inst.status === 'Overdue' || (inst.status === 'Pending' && new Date(inst.due_date) < new Date())
+                            {installments?.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={6} className="text-center py-4 text-muted-foreground">
+                                        No installments found.
+                                    </TableCell>
+                                </TableRow>
+                            ) : (
+                                installments?.map((inst: any) => {
+                                    const isOverdue = inst.status === 'Overdue' || (inst.status === 'Pending' && new Date(inst.due_date) < new Date())
 
-                                return (
-                                    <TableRow key={inst.id} className={isOverdue ? "bg-red-50 hover:bg-red-100/50" : ""}>
-                                        <TableCell className={isOverdue ? "text-red-700 font-medium" : ""}>
-                                            {new Date(inst.due_date).toLocaleDateString()}
-                                        </TableCell>
-                                        <TableCell>{inst.plot?.plot_number}</TableCell>
-                                        <TableCell>
-                                            <div className="font-medium">{inst.client?.name}</div>
-                                            <div className="text-xs text-muted-foreground">{inst.client?.cnic}</div>
-                                        </TableCell>
-                                        <TableCell>{inst.amount.toLocaleString()}</TableCell>
-                                        <TableCell>
-                                            <Badge variant={inst.status === 'Paid' ? 'default' : isOverdue ? 'destructive' : 'secondary'}>
-                                                {inst.status}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell>
-                                            <InstallmentActions id={inst.id} status={inst.status} />
-                                        </TableCell>
-                                    </TableRow>
-                                )
-                            })}
+                                    return (
+                                        <TableRow key={inst.id} className={isOverdue ? "bg-red-50 hover:bg-red-100/50" : ""}>
+                                            <TableCell className={isOverdue ? "text-red-700 font-medium" : ""}>
+                                                {new Date(inst.due_date).toLocaleDateString()}
+                                            </TableCell>
+                                            <TableCell>{inst.plot?.plot_number}</TableCell>
+                                            <TableCell>
+                                                <div className="font-medium">{inst.client?.name}</div>
+                                                <div className="text-xs text-muted-foreground">{inst.client?.cnic}</div>
+                                            </TableCell>
+                                            <TableCell>{Number(inst.amount).toLocaleString()}</TableCell>
+                                            <TableCell>
+                                                <Badge variant={inst.status === 'Paid' ? 'default' : isOverdue ? 'destructive' : 'secondary'}>
+                                                    {inst.status}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell>
+                                                <InstallmentActions
+                                                    id={inst.id}
+                                                    status={inst.status}
+                                                    amount={inst.amount}
+                                                    dueDate={inst.due_date}
+                                                />
+                                            </TableCell>
+                                        </TableRow>
+                                    )
+                                })
+                            )}
                         </TableBody>
                     </Table>
                 </CardContent>
