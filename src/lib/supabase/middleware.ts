@@ -33,7 +33,16 @@ export async function updateSession(request: NextRequest) {
         }
     )
 
-    const { data: { user } } = await supabase.auth.getUser()
+    let user = null
+    try {
+        const { data } = await supabase.auth.getUser()
+        user = data.user
+    } catch (e) {
+        console.error('Middleware: Auth check failed', e)
+        // In case of a network failure during auth check, we don't want to crash.
+        // We can either let it through or redirect to login depending on security needs.
+        // For development fetch issues, we'll log it.
+    }
 
     if (request.nextUrl.pathname.startsWith('/dashboard') && !user) {
         return NextResponse.redirect(new URL('/login', request.url))
